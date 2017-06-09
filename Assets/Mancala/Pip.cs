@@ -6,24 +6,60 @@ using UnityEngine.EventSystems;
 using System;
 
 public class Pip : MonoBehaviour, IDragHandler, IPointerDownHandler {
-    
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+
+    private Vector2 pointerOffset;
+    private RectTransform canvasRectTransform;
+    private RectTransform pipRectTransform;
+    private RectTransform fieldRectTransform;
+
+    Canvas canvas;
+    Field field;
+
+    void Awake () {
+        canvas = GetComponentInParent<Canvas>();
+        field = GetComponentInParent<Field>();
+        if (canvas!= null)
+        {
+            canvasRectTransform = canvas.transform as RectTransform;
+            fieldRectTransform = field.transform as RectTransform;
+            pipRectTransform = transform as RectTransform;
+        }
 	}
 
-    public void OnDrag(PointerEventData eventData)
+    public void OnPointerDown(PointerEventData data)
     {
-        throw new NotImplementedException();
+        pipRectTransform.SetAsLastSibling();
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(pipRectTransform, data.position, data.pressEventCamera, out pointerOffset);
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void OnDrag(PointerEventData data)
     {
-        throw new NotImplementedException();
+        if(pipRectTransform == null)
+        {
+            return;
+        }
+
+        Vector2 pointerPosition = ClampToWindow(data);
+
+        Vector2 localPointerPosition;
+        if(RectTransformUtility.ScreenPointToLocalPointInRectangle(fieldRectTransform, pointerPosition, data.pressEventCamera,out localPointerPosition))
+        {
+            pipRectTransform.localPosition = localPointerPosition - pointerOffset;
+        }
+    }
+
+    Vector2 ClampToWindow(PointerEventData data)
+    {
+        Vector2 rawPointerPosition = data.position;
+
+        Vector3[] canvasCorners = new Vector3[4];
+        canvasRectTransform.GetWorldCorners(canvasCorners);
+
+        float clampX = Mathf.Clamp (rawPointerPosition.x, canvasCorners[0].x, canvasCorners[2].x);
+        float clampY = Mathf.Clamp (rawPointerPosition.y, canvasCorners[0].y, canvasCorners[2].y);
+
+
+        Vector2 newPointerPosition = new Vector2(clampX, clampY);
+        return newPointerPosition;
     }
 }

@@ -11,7 +11,7 @@ public class PanelManager : MonoBehaviour {
     private Field[] fields;
     
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         fields = GetComponentsInChildren<Field>();
 
