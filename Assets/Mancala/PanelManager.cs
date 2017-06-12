@@ -9,7 +9,7 @@ public class PanelManager : MonoBehaviour {
     [SerializeField] Image[] pips;
 
     private Field[] fields;
-    
+
     // Use this for initialization
     void Awake()
     {
@@ -19,6 +19,38 @@ public class PanelManager : MonoBehaviour {
         PlacingPips(-30f);
 
         gameObject.SetActive(false);
+    }
+
+    public void FieldSelected(Field selected, int pipsInIt)
+    {
+        int tempCount = 0, selectedNumber =0;
+        foreach(Field field in fields)
+        {
+            field.fieldIsMovable = false;
+            field.CheckForColorsAtStart();
+            if(field == selected)
+            {
+                selectedNumber = tempCount;
+            }
+            else
+            {
+                tempCount++;
+            }
+        }
+
+        placableFields(pipsInIt, selectedNumber +1);
+    }
+
+    void placableFields(int pipsInIt, int selectedNumber)
+    {
+        for (int i = 0; i < pipsInIt; i++)
+        {
+            if (selectedNumber + i == fields.Length)
+            {
+                selectedNumber -= fields.Length;
+            }
+            fields[selectedNumber + i].PlacableField();
+        }
     }
 
     private void PlacingPips(float placement)

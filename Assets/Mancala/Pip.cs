@@ -12,24 +12,38 @@ public class Pip : MonoBehaviour, IDragHandler, IPointerDownHandler {
     private RectTransform pipRectTransform;
     private RectTransform fieldRectTransform;
 
+    public bool pipIsMovable = false;
+
     Canvas canvas;
     Field field;
 
-    void Awake () {
+    void Awake ()
+    {
         canvas = GetComponentInParent<Canvas>();
-        field = GetComponentInParent<Field>();
-        if (canvas!= null)
+
+        ChangedParentField();
+
+        if (canvas != null)
         {
             canvasRectTransform = canvas.transform as RectTransform;
-            fieldRectTransform = field.transform as RectTransform;
             pipRectTransform = transform as RectTransform;
         }
-	}
+    }
+
+    public void ChangedParentField()
+    {
+        field = GetComponentInParent<Field>();
+        if (canvas != null)
+        {
+            fieldRectTransform = field.transform as RectTransform;
+        }
+    }
 
     public void OnPointerDown(PointerEventData data)
     {
         pipRectTransform.SetAsLastSibling();
         RectTransformUtility.ScreenPointToLocalPointInRectangle(pipRectTransform, data.position, data.pressEventCamera, out pointerOffset);
+        
     }
 
     public void OnDrag(PointerEventData data)
@@ -40,11 +54,13 @@ public class Pip : MonoBehaviour, IDragHandler, IPointerDownHandler {
         }
 
         Vector2 pointerPosition = ClampToWindow(data);
-
-        Vector2 localPointerPosition;
-        if(RectTransformUtility.ScreenPointToLocalPointInRectangle(fieldRectTransform, pointerPosition, data.pressEventCamera,out localPointerPosition))
+        if (pipIsMovable)
         {
-            pipRectTransform.localPosition = localPointerPosition - pointerOffset;
+            Vector2 localPointerPosition;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(fieldRectTransform, pointerPosition, data.pressEventCamera, out localPointerPosition))
+            {
+                pipRectTransform.localPosition = localPointerPosition - pointerOffset;
+            }
         }
     }
 
