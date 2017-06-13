@@ -6,7 +6,10 @@ using UnityEngine.UI;
 
 public class PanelManager : MonoBehaviour {
 
-    [SerializeField] Image[] pips;
+    //TODO make that there could be placed 1-2 pips
+    //TODO send message up to react in which field placement ended
+
+    [SerializeField] Pip[] pips;
 
     private Field[] fields;
 
@@ -19,6 +22,23 @@ public class PanelManager : MonoBehaviour {
         PlacingPips(-30f);
 
         gameObject.SetActive(false);
+    }
+
+    public void StartingOver()
+    {
+        foreach(Field field in fields)
+        {
+            if (field.PipCount() == 0)
+            {
+                field.fieldIsMovable = false;
+            }
+            else
+            {
+                field.fieldIsMovable = true;
+            }
+            field.StopPipMovement();
+            field.CheckForColorsAtStart();
+        }
     }
 
     public void FieldSelected(Field selected, int pipsInIt)
@@ -37,7 +57,6 @@ public class PanelManager : MonoBehaviour {
                 tempCount++;
             }
         }
-
         placableFields(pipsInIt, selectedNumber +1);
     }
 
@@ -51,13 +70,19 @@ public class PanelManager : MonoBehaviour {
             }
             fields[selectedNumber + i].PlacableField();
         }
+        EndField(selectedNumber + pipsInIt - 1);
+    }
+
+    void EndField(int endField)
+    {
+        Debug.Log(fields[endField]);
     }
 
     private void PlacingPips(float placement)
     {
-        Image[] tempPips = null;
-        Image temp = null;
-        tempPips = pips;
+        Pip[] tempPips = null;
+        Pip temp = null;
+        tempPips = pips;    
 
         foreach (Field field in fields)
         {

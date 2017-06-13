@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Field : MonoBehaviour {
+
+    //TODO create socket for pips to fall
 
     PanelManager panelManager;
     Button button;
@@ -14,6 +17,9 @@ public class Field : MonoBehaviour {
 
     public Vector3 offset;
     public bool fieldIsMovable = true;
+
+    private bool placable = false;
+    private int pipsMustBePlaced;
     
 	void Start () {
         panelManager = GetComponentInParent<PanelManager>();
@@ -27,9 +33,37 @@ public class Field : MonoBehaviour {
         CheckForColorsAtStart();
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (placable)
+        {
+            collision.transform.SetParent(gameObject.transform, true);
+
+            RecountPips();
+            pips[pips.Length - 1].ChangedParentField();
+
+            pipsMustBePlaced--;
+            if (pipsMustBePlaced <= 0)
+            {
+                placable = false;
+                CheckForColorsAtStart();
+                
+            }
+        }
+    }
+
+    public int PipCount()
+    {
+        pips = GetComponentsInChildren<Pip>();
+        return pips.Length;
+    }
+
+
     public void PlacableField()
     {
-        button.colors = ColorChange(Color.yellow, Color.red);
+        button.colors = ColorChange(Color.yellow, Color.yellow);
+        pipsMustBePlaced++;
+        placable = true;
     }
 
     private void SelectField()
@@ -47,6 +81,7 @@ public class Field : MonoBehaviour {
 
     public void CheckForColorsAtStart()
     {
+        pipsMustBePlaced = 0;
         if (fieldIsMovable)
         {
             button.colors = ColorChange(Color.green, Color.green);
@@ -66,14 +101,17 @@ public class Field : MonoBehaviour {
         return colorBlock;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+
+
+    public void StopPipMovement()
     {
-        collision.transform.SetParent(gameObject.transform, true);
-        PipCount();
-        pips[pips.Length -1].ChangedParentField();
+        foreach(Pip pip in pips)
+        {
+            pip.pipIsMovable = false;
+        }
     }
 
-    private void PipCount()
+    private void RecountPips()
     {
         pips = GetComponentsInChildren<Pip>();
     }
